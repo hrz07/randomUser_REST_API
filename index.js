@@ -21,6 +21,8 @@ app.get('/user/all', (req, res) => {
     res.json(parseData)
 })
 
+
+
 app.get('/user/random', (req, res) => {
     let arr = []
     let randomNumber = Math.floor((Math.random() * 12) + 1);
@@ -35,8 +37,7 @@ app.get('/user/random', (req, res) => {
 
 
 app.post('/user/save', (req, res) => {
-    // console.log(req.body)
-
+   
     if (!req.body.id || typeof (req.body.id) == 'string') {
         if (!req.body.id) {   
             res.send("id missing") 
@@ -51,6 +52,14 @@ app.post('/user/save', (req, res) => {
         }
         else {
             res.send("name should be string type")
+        } 
+    }
+    else if (!req.body.contact || typeof (req.body.contact) == 'string'  )  {
+        if (!req.body.contact) {
+            res.send("contact information missing")
+        }
+        else {
+            res.send("contact  should be number type")
         } 
     }
     else if (!req.body.gender || typeof (req.body.gender) == 'number') {
@@ -77,22 +86,47 @@ app.post('/user/save', (req, res) => {
             res.send("provide a valid photoUrl")
         }
     } else {
-        res.send('Data added successfully')
+
+
+        fs.readFile('./data.json', (err, data) => {
+            let jsonData = JSON.parse(data)
+
+            let notAvailable = true;
+            jsonData.map(i => {
+                if (i.id == req.body.id) {
+                    notAvailable = false
+                }
+            })
+            
+            if (notAvailable) {
+                const userData = {
+                    "id": req.body.id,
+                    "gender": req.body.gender,
+                    "name": req.body.name,
+                    "contact": req.body.contact,
+                    "address": req.body.address,
+                    "photoUrl": req.body.photoUrl
+                }
+    
+                jsonData.push(userData)
+                fs.writeFileSync('./data.json', JSON.stringify(jsonData)) 
+                res.send('Data added successfully')  
+            } else {
+                res.send("This id already available.")
+            }
+
+          
+        })
+
+        
     }
 
 
 
 
-    const userData = {
-        "id" : 10,
-        "name" : "Hridoy"
-    }
+    
 
-    // fs.readFile('./data.json', (err, data) => {
-    //     let jsonData = JSON.parse(data)
-    //     jsonData.push(userData)
-    //     fs.writeFileSync('./data.json',JSON.stringify(jsonData))
-    // })
+   
     
 })
 
