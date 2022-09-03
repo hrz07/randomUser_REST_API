@@ -92,7 +92,7 @@ app.post('/user/save', (req, res) => {
     } else {
 
 
-        fs.readFile('./data.json', (err, data) => {
+      let data =   fs.readFileSync('./data.json')
             let jsonData = JSON.parse(data)
 
             let notAvailable = true;
@@ -118,7 +118,7 @@ app.post('/user/save', (req, res) => {
             } else {
                 res.send("This id already available.")
             }  
-        })  
+         
     }
 })
 
