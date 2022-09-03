@@ -2,6 +2,10 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const fs = require('fs')
+require('dotenv').config()
+const port = process.env.PORT || 5000
+
+
 
 app.use(cors());
 app.use(express.json());
@@ -113,21 +117,97 @@ app.post('/user/save', (req, res) => {
                 res.send('Data added successfully')  
             } else {
                 res.send("This id already available.")
-            }
-
-          
-        })
-
-        
+            }  
+        })  
     }
-
-
-
-
-    
-
-   
-    
 })
 
-app.listen(5000);
+
+
+
+app.patch('/user/update', (req, res) => {
+
+    if (!req.body.id || typeof (req.body.id) == 'string') {
+        if (!req.body.id) {   
+            res.send("id missing") 
+        }
+        else {
+            res.send("id should be number type")
+        }
+    } else {
+        const userData = {
+            "id": req.body.id,
+            "gender": req.body.gender,
+            "name": req.body.name,
+            "contact": req.body.contact,
+            "address": req.body.address,
+            "photoUrl": req.body.photoUrl
+        }
+    
+        fs.readFile('./data.json', (err, data) => {
+            let jsonData = JSON.parse(data)
+            let isAvailable = false;
+            jsonData.map(i => {
+                if (i.id == req.body.id) {
+                    isAvailable = true
+                }
+            })
+            if (isAvailable) {
+                let filteredData = jsonData.filter(i=> i.id !== req.body.id)
+                filteredData.push(userData)
+                fs.writeFile('./data.json', JSON.stringify(filteredData), (err) => {
+                    if (!err) {
+                        res.send("Data updated successfully.")
+                    }
+                }) 
+            } else {
+                res.send("This id not available.")
+            }
+        })
+    }  
+})
+
+
+
+
+
+app.delete('/user/delete', (req, res) => {
+    if (!req.body.id || typeof (req.body.id) == 'string') {
+        if (!req.body.id) {   
+            res.send("id missing") 
+        }
+        else {
+            res.send("id should be number type")
+        }
+    } else {
+        fs.readFile('./data.json', (err, data) => {
+            let jsonData = JSON.parse(data)
+            let isAvailable = false;
+            jsonData.map(i => {
+                if (i.id == req.body.id) {
+                    isAvailable = true
+                }
+            })
+
+            if (isAvailable) {
+                let filteredData = jsonData.filter(i=> i.id !== req.body.id)
+                fs.writeFile('./data.json', JSON.stringify(filteredData), (err) => {
+                    if (!err) {
+                        res.send("Data deleted successfully.")
+                    }
+                }) 
+            }
+            else {
+                res.send("This id not available.") 
+            }
+        })
+    }
+})
+
+
+
+
+
+
+
+app.listen(port);
